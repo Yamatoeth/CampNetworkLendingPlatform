@@ -1,0 +1,1132 @@
+        async function supplyAsset(asset, amount) {
+            try {
+                const tokenAddress = getTokenAddress(asset);
+                const campLendContract = new web3.eth.Contract(CAMP_LEND_ABI, CONTRACTS.CAMP_LEND);
+                const tokenContract = new web3.eth.Contract(ERC20_ABI, tokenAddress);
+                
+                const decimals = await tokenContract.methods.decimals().call();
+                const amountWei = web3.utils.toBN(amount).mul(web3.utils.toBN(10).pow(web3.utils.toBN(decimals)));
+                
+                // Approuver le contrat CampLend
+                await tokenContract.methods.approve(CONTRACTS.CAMP_LEND, amountWei).send({
+                    from: userAccount,
+                    gas: 100000
+                });
+                
+                // Effectuer le dépôt
+                await campLendContract.methods.supply(tokenAddress, amountWei).send({
+                    from: userAccount,
+                    gas: 300000
+                });
+                
+            } catch (error) {
+                console.error('Erreur lors du dépôt:', error);
+                throw error;
+            }
+        }
+
+        async function borrowAsset(asset, amount) {
+            try {
+                const tokenAddress = getTokenAddress(asset);
+                const campLendContract = new web3.eth.Contract(CAMP_LEND_ABI, CONTRACTS.CAMP_LEND);
+                const tokenContract = new web3.eth.Contract(ERC20_ABI, tokenAddress);
+                
+                const decimals = await tokenContract.methods.decimals().call();
+                const amountWei = web3.utils.toBN(amount).mul(web3.utils.toBN(10).pow(web3.utils.toBN(decimals)));
+                
+                // Effectuer l'emprunt
+                await campLendContract.methods.borrow(tokenAddress, amountWei).send({
+                    from: userAccount,
+                    gas: 400000
+                });
+                
+            } catch (error) {
+                console.error('Erreur lors de l\'emprunt:', error);
+                throw error;
+            }
+        }
+        
+        function getTokenAddress(symbol) {
+            const tokenMap = {
+                'wCAMP': CONTRACTS.wCAMP,
+                'CP': CONTRACTS.CP,
+                'MUSDC': CONTRACTS.MUSDC,
+                'WBTC': CONTRACTS.WBTC,
+                'WETH': CONTRACTS.WETH,
+                'MUSDT': CONTRACTS.MUSDT
+            };
+            return tokenMap[symbol];
+        }
+        
+        // Fonction pour obtenir des tokens de test (faucet)
+        async function requestTestTokens(asset) {
+            try {
+                const tokenAddress = getTokenAddress(asset);
+                if (!tokenAddress || tokenAddress === '0x...') {
+                    alert('Adresse du token non configurée<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampLend - Plateforme DeFi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #b8bcc8;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #667eea;
+        }
+
+        .connect-wallet {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .connect-wallet:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Main Content */
+        .main {
+            padding: 40px 0;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .stats-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats-title {
+            font-size: 18px;
+            color: #b8bcc8;
+            margin-bottom: 10px;
+        }
+
+        .stats-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .stats-change {
+            font-size: 14px;
+            color: #4ade80;
+        }
+
+        /* Action Tabs */
+        .action-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 6px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-button {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #b8bcc8;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Market Table */
+        .market-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .market-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .market-table th {
+            text-align: left;
+            padding: 15px;
+            color: #b8bcc8;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .market-table td {
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .market-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .asset-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .asset-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .asset-name {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .action-button {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-button:hover {
+            background: rgba(102, 126, 234, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .action-button.borrow {
+            background: rgba(236, 72, 153, 0.2);
+            color: #ec4899;
+            border-color: rgba(236, 72, 153, 0.3);
+        }
+
+        .action-button.borrow:hover {
+            background: rgba(236, 72, 153, 0.3);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            backdrop-filter: blur(20px);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            color: #b8bcc8;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .close-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #b8bcc8;
+            font-weight: 600;
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            color: #ffffff;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-button {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .wallet-status {
+            display: none;
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .market-table {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo">CampLend</div>
+                <div class="nav-links">
+                    <a href="#" class="nav-link active">Marché</a>
+                    <a href="#" class="nav-link">Portfolio</a>
+                    <a href="#" class="nav-link">Gouvernance</a>
+                </div>
+                <div>
+                    <button class="connect-wallet" id="connectWallet">Connecter Wallet</button>
+                    <span class="wallet-status" id="walletStatus">Connecté</span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <!-- Dashboard Stats -->
+            <div class="dashboard">
+                <div class="stats-card">
+                    <div class="stats-title">Valeur Totale Verrouillée</div>
+                    <div class="stats-value" id="tvl">$0.00</div>
+                    <div class="stats-change">+12.5% ce mois</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-title">Total Emprunts</div>
+                    <div class="stats-value" id="totalBorrows">$0.00</div>
+                    <div class="stats-change">+8.3% ce mois</div>
+                </div>
+            </div>
+
+            <!-- Action Tabs -->
+            <div class="action-tabs">
+                <button class="tab-button active" data-tab="supply">Fournir</button>
+                <button class="tab-button" data-tab="borrow">Emprunter</button>
+            </div>
+
+            <!-- Market Section -->
+            <div class="market-section">
+                <h2 class="section-title">Marchés Disponibles</h2>
+                <div class="tab-content" id="supplyTab">
+                    <table class="market-table">
+                        <thead>
+                            <tr>
+                                <th>Asset</th>
+                                <th>APY Dépôt</th>
+                                <th>Solde Wallet</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="supplyTableBody">
+                            <!-- Content will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tab-content" id="borrowTab" style="display: none;">
+                    <table class="market-table">
+                        <thead>
+                            <tr>
+                                <th>Asset</th>
+                                <th>APY Emprunt</th>
+                                <th>Liquidité</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="borrowTableBody">
+                            <!-- Content will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal" id="actionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Action</h3>
+                <button class="close-button" id="closeModal">&times;</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Montant</label>
+                <input type="number" class="input-field" id="amountInput" placeholder="0.00">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Asset</label>
+                <input type="text" class="input-field" id="assetInput" readonly>
+            </div>
+            <button class="submit-button" id="submitAction">Confirmer</button>
+        </div>
+    </div>
+
+    <script>
+        // Market data - Mise à jour pour Camp Network
+        const marketData = [
+            {
+                symbol: 'wCAMP',
+                name: 'Wrapped CAMP',
+                supplyApy: '6.25%',
+                borrowApy: '8.50%',
+                walletBalance: '0.00',
+                liquidity: '$25K',
+                borrowEnabled: true
+            },
+            {
+                symbol: 'CP',
+                name: 'CampPoint',
+                supplyApy: '4.75%',
+                borrowApy: 'N/A',
+                walletBalance: '0.00',
+                liquidity: '$15K',
+                borrowEnabled: false
+            },
+            {
+                symbol: 'MUSDC',
+                name: 'Mock USD Coin',
+                supplyApy: '8.75%',
+                borrowApy: 'N/A',
+                walletBalance: '0.00',
+                liquidity: '$50K',
+                borrowEnabled: false
+            },
+            {
+                symbol: 'WBTC',
+                name: 'Wrapped Bitcoin',
+                supplyApy: '3.15%',
+                borrowApy: 'N/A',
+                walletBalance: '0.00',
+                liquidity: '$30K',
+                borrowEnabled: false
+            },
+            {
+                symbol: 'WETH',
+                name: 'Wrapped Ethereum',
+                supplyApy: '4.25%',
+                borrowApy: 'N/A',
+                walletBalance: '0.00',
+                liquidity: '$40K',
+                borrowEnabled: false
+            },
+            {
+                symbol: 'MUSDT',
+                name: 'Mock USD Tether',
+                supplyApy: '7.80%',
+                borrowApy: 'N/A',
+                walletBalance: '0.00',
+                liquidity: '$35K',
+                borrowEnabled: false
+            }
+        ];
+
+        // Web3 variables
+        let web3;
+        let userAccount;
+        let lendingContract;
+
+        // Contract addresses - A METTRE A JOUR APRES DEPLOIEMENT
+        const CONTRACTS = {
+            CAMP_LEND: '0x...', // Adresse du contrat CampLend principal
+            COMPTROLLER: '0x...', // Adresse du Comptroller
+            ORACLE: '0x...', // Adresse du PriceOracle
+            // Tokens Camp Network
+            CP: '0x52DE57cc9f27b8c2f7F949Ccc784aD5c071eB537',        // CampPoint
+            MUSDC: '0x71002dbf6cC7A885cE6563682932370c056aAca9',     // Mock USD Coin
+            wCAMP: '0x1aE9c40eCd2DD6ad5858E5430A556d7aff28A44b',     // wrapped CAMP
+            WBTC: '0x587aF234D373C752a6F6E9eD6c4Ce871e7528BCF',      // wrapped BTC
+            WETH: '0xC42BAA20e3a159cF7A8aDFA924648C2a2d59E062',      // WETH
+            MUSDT: '0xA745f7A59E70205e6040BdD3b33eD21DBD23FEB3'      // Mock USD Tether
+        };
+        
+        // ABI des contrats (versions simplifiées pour l'interface)
+        const CAMP_LEND_ABI = [
+            {
+                "inputs": [{"type": "address", "name": "underlying"}, {"type": "uint256", "name": "amount"}],
+                "name": "supply",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"type": "address", "name": "underlying"}, {"type": "uint256", "name": "amount"}],
+                "name": "borrow",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"type": "address", "name": "underlying"}, {"type": "uint256", "name": "amount"}],
+                "name": "repay",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"type": "address", "name": "underlying"}, {"type": "uint256", "name": "amount"}],
+                "name": "withdraw",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "getAllMarkets",
+                "outputs": [{"type": "address[]"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"type": "address", "name": "account"}, {"type": "address", "name": "underlying"}],
+                "name": "getAccountSnapshot",
+                "outputs": [{"type": "uint256"}, {"type": "uint256"}, {"type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"type": "address", "name": ""}],
+                "name": "cTokens",
+                "outputs": [{"type": "address"}],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+        
+        const CTOKEN_ABI = [
+            {
+                "inputs": [{"type": "uint256", "name": "mintAmount"}],
+                "name": "mint",
+                "outputs": [{"type": "uint256"}],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"type": "uint256", "name": "redeemTokens"}],
+                "name": "redeem",
+                "outputs": [{"type": "uint256"}],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"type": "address", "name": "account"}],
+                "name": "balanceOf",
+                "outputs": [{"type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"type": "address", "name": "account"}],
+                "name": "borrowBalanceStored",
+                "outputs": [{"type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "underlying",
+                "outputs": [{"type": "address"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "exchangeRate",
+                "outputs": [{"type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "getSupplyRate",
+                "outputs": [{"type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "getBorrowRate",
+                "outputs": [{"type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+        
+        const ERC20_ABI = [
+            {
+                "inputs": [{"type": "address", "name": "spender"}, {"type": "uint256", "name": "amount"}],
+                "name": "approve",
+                "outputs": [{"type": "bool"}],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"type": "address", "name": "account"}],
+                "name": "balanceOf",
+                "outputs": [{"type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "decimals",
+                "outputs": [{"type": "uint8"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"type": "uint256", "name": "amount"}],
+                "name": "faucet",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ];
+
+        const CAMP_NETWORK_CONFIG = {
+            chainId: '0x4f650', // 325000 en hexadécimal
+            chainName: 'Camp Network',
+            nativeCurrency: {
+                name: 'ETH',
+                symbol: 'ETH',
+                decimals: 18
+            },
+            rpcUrls: ['https://rpc-campnetwork.xyz'],
+            blockExplorerUrls: ['https://explorer.campnetwork.xyz']
+        };
+
+        // DOM elements
+        const connectWalletBtn = document.getElementById('connectWallet');
+        const walletStatus = document.getElementById('walletStatus');
+        const actionModal = document.getElementById('actionModal');
+        const closeModal = document.getElementById('closeModal');
+        const submitAction = document.getElementById('submitAction');
+        const amountInput = document.getElementById('amountInput');
+        const assetInput = document.getElementById('assetInput');
+        const modalTitle = document.getElementById('modalTitle');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            populateMarketTables();
+            setupEventListeners();
+            checkWalletConnection();
+        });
+
+        function populateMarketTables() {
+            const supplyTableBody = document.getElementById('supplyTableBody');
+            const borrowTableBody = document.getElementById('borrowTableBody');
+
+            marketData.forEach(asset => {
+                // Supply table row
+                const supplyRow = `
+                    <tr>
+                        <td>
+                            <div class="asset-info">
+                                <div class="asset-icon">${asset.symbol[0]}</div>
+                                <div>
+                                    <div class="asset-name">${asset.name}</div>
+                                    <div style="color: #b8bcc8; font-size: 12px;">${asset.symbol}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="color: #4ade80; font-weight: 600;">${asset.supplyApy}</td>
+                        <td>${asset.walletBalance} ${asset.symbol}</td>
+                        <td>
+                            <button class="action-button" onclick="openModal('supply', '${asset.symbol}')">Déposer</button>
+                        </td>
+                    </tr>
+                `;
+
+                // Borrow table row
+                const borrowRow = asset.borrowEnabled ? `
+                    <tr>
+                        <td>
+                            <div class="asset-info">
+                                <div class="asset-icon">${asset.symbol[0]}</div>
+                                <div>
+                                    <div class="asset-name">${asset.name}</div>
+                                    <div style="color: #b8bcc8; font-size: 12px;">${asset.symbol}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="color: #ec4899; font-weight: 600;">${asset.borrowApy}</td>
+                        <td>${asset.liquidity}</td>
+                        <td>
+                            <button class="action-button borrow" onclick="openModal('borrow', '${asset.symbol}')">Emprunter</button>
+                        </td>
+                    </tr>
+                ` : `
+                    <tr style="opacity: 0.5;">
+                        <td>
+                            <div class="asset-info">
+                                <div class="asset-icon">${asset.symbol[0]}</div>
+                                <div>
+                                    <div class="asset-name">${asset.name}</div>
+                                    <div style="color: #b8bcc8; font-size: 12px;">${asset.symbol}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="color: #666;">N/A</td>
+                        <td>${asset.liquidity}</td>
+                        <td>
+                            <span style="color: #666; font-size: 12px;">Borrow désactivé</span>
+                        </td>
+                    </tr>
+                `;
+
+                supplyTableBody.innerHTML += supplyRow;
+                borrowTableBody.innerHTML += borrowRow;
+            });
+        }
+
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const tab = this.dataset.tab;
+                    switchTab(tab);
+                });
+            });
+
+            // Modal events
+            closeModal.addEventListener('click', closeActionModal);
+            actionModal.addEventListener('click', function(e) {
+                if (e.target === actionModal) {
+                    closeActionModal();
+                }
+            });
+
+            // Wallet connection
+            connectWalletBtn.addEventListener('click', connectWallet);
+
+            // Submit action
+            submitAction.addEventListener('click', executeAction);
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+
+            document.getElementById('supplyTab').style.display = tab === 'supply' ? 'block' : 'none';
+            document.getElementById('borrowTab').style.display = tab === 'borrow' ? 'block' : 'none';
+        }
+
+        async function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    userAccount = accounts[0];
+                    
+                    // Switch to Camp Network
+                    await switchToCampNetwork();
+                    
+                    // Initialize Web3
+                    web3 = new Web3(window.ethereum);
+                    
+                    // Update UI
+                    connectWalletBtn.style.display = 'none';
+                    walletStatus.style.display = 'inline-block';
+                    walletStatus.textContent = `${userAccount.substring(0, 6)}...${userAccount.substring(38)}`;
+                    
+                    // Load user balances
+                    await loadUserBalances();
+                    addFaucetButtons();
+                    
+                } catch (error) {
+                    console.error('Erreur de connexion wallet:', error);
+                    alert('Erreur lors de la connexion au wallet');
+                }
+            } else {
+                alert('MetaMask n\'est pas installé');
+            }
+        }
+
+        async function switchToCampNetwork() {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: CAMP_NETWORK_CONFIG.chainId }],
+                });
+            } catch (switchError) {
+                if (switchError.code === 4902) {
+                    // Chain not added, add it
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [CAMP_NETWORK_CONFIG]
+                    });
+                }
+            }
+        }
+
+        function checkWalletConnection() {
+            if (typeof window.ethereum !== 'undefined' && window.ethereum.selectedAddress) {
+                userAccount = window.ethereum.selectedAddress;
+                connectWalletBtn.style.display = 'none';
+                walletStatus.style.display = 'inline-block';
+                walletStatus.textContent = `${userAccount.substring(0, 6)}...${userAccount.substring(38)}`;
+                
+                // Initialiser Web3 et charger les données
+                web3 = new Web3(window.ethereum);
+                loadUserBalances();
+                addFaucetButtons();
+            }
+        }
+
+        async function loadUserBalances() {
+            if (!web3 || !userAccount) return;
+            
+            try {
+                // Charger le contrat CampLend
+                const campLendContract = new web3.eth.Contract(CAMP_LEND_ABI, CONTRACTS.CAMP_LEND);
+                
+                // Obtenir tous les marchés
+                const markets = await campLendContract.methods.getAllMarkets().call();
+                
+                let totalSupplied = 0;
+                let totalBorrowed = 0;
+                
+                for (let market of markets) {
+                    const cTokenContract = new web3.eth.Contract(CTOKEN_ABI, market);
+                    const underlying = await cTokenContract.methods.underlying().call();
+                    
+                    // Obtenir le snapshot du compte
+                    const snapshot = await campLendContract.methods.getAccountSnapshot(userAccount, underlying).call();
+                    
+                    // Calculer les valeurs en USD (simplifié)
+                    const exchangeRate = parseFloat(web3.utils.fromWei(snapshot.exchangeRate));
+                    const cTokenBalance = parseFloat(web3.utils.fromWei(snapshot.cTokenBalance));
+                    const borrowBalance = parseFloat(web3.utils.fromWei(snapshot.borrowBalance));
+                    
+                    totalSupplied += cTokenBalance * exchangeRate;
+                    totalBorrowed += borrowBalance;
+                }
+                
+                // Mettre à jour l'UI
+                document.getElementById('tvl').textContent = `${totalSupplied.toFixed(2)}`;
+                document.getElementById('totalBorrows').textContent = `${totalBorrowed.toFixed(2)}`;
+                
+                // Mettre à jour les soldes des tokens dans le tableau
+                await updateWalletBalances();
+                
+            } catch (error) {
+                console.error('Erreur lors du chargement des soldes:', error);
+            }
+        }
+        
+        async function updateWalletBalances() {
+            const tokenContracts = {
+                'wCAMP': { address: CONTRACTS.wCAMP, decimals: 18 },
+                'CP': { address: CONTRACTS.CP, decimals: 18 },
+                'MUSDC': { address: CONTRACTS.MUSDC, decimals: 6 },
+                'WBTC': { address: CONTRACTS.WBTC, decimals: 8 },
+                'WETH': { address: CONTRACTS.WETH, decimals: 18 },
+                'MUSDT': { address: CONTRACTS.MUSDT, decimals: 6 }
+            };
+            
+            for (let [symbol, token] of Object.entries(tokenContracts)) {
+                try {
+                    const tokenContract = new web3.eth.Contract(ERC20_ABI, token.address);
+                    let balance = await tokenContract.methods.balanceOf(userAccount).call();
+                    balance = parseFloat(balance) / Math.pow(10, token.decimals);
+                    
+                    // Mettre à jour l'affichage dans le tableau
+                    const cells = document.querySelectorAll(`td:contains('${symbol}')`);
+                    cells.forEach(cell => {
+                        const row = cell.closest('tr');
+                        if (row) {
+                            const balanceCell = row.cells[2];
+                            if (balanceCell) {
+                                balanceCell.textContent = `${balance.toFixed(4)} ${symbol}`;
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error(`Erreur lors du chargement du solde ${symbol}:`, error);
+                }
+            }
+        }
+
+        function openModal(action, asset) {
+            if (!userAccount) {
+                alert('Veuillez connecter votre wallet');
+                return;
+            }
+            
+            // Vérifier si le borrow est disponible pour cet asset
+            if (action === 'borrow') {
+                const assetData = marketData.find(a => a.symbol === asset);
+                if (!assetData.borrowEnabled) {
+                    alert(`L'emprunt n'est pas disponible pour ${asset}. Seul wCAMP peut être emprunté pour le moment.`);
+                    return;
+                }
+            }
+            
+            modalTitle.textContent = action === 'supply' ? `Déposer ${asset}` : `Emprunter ${asset}`;
+            assetInput.value = asset;
+            actionModal.style.display = 'flex';
+            actionModal.dataset.action = action;
+            actionModal.dataset.asset = asset;
+        }
+
+        function closeActionModal() {
+            actionModal.style.display = 'none';
+            amountInput.value = '';
+        }
+
+        async function executeAction() {
+            const action = actionModal.dataset.action;
+            const asset = actionModal.dataset.asset;
+            const amount = amountInput.value;
+
+            if (!amount || parseFloat(amount) <= 0) {
+                alert('Veuillez entrer un montant valide');
+                return;
+            }
+
+            try {
+                submitAction.textContent = 'Transaction en cours...';
+                submitAction.disabled = true;
+
+                if (action === 'supply') {
+                    await supplyAsset(asset, amount);
+                } else {
+                    await borrowAsset(asset, amount);
+                }
+
+                alert('Transaction réussie!');
+                closeActionModal();
+                await loadUserBalances();
+
+            } catch (error) {
+                console.error('Erreur transaction:', error);
+                alert('Erreur lors de la transaction');
+            } finally {
+                submitAction.textContent = 'Confirmer';
+                submitAction.disabled = false;
+            }
+        }
+
+        // Fonction pour obtenir des tokens de test (faucet)
+        async function requestTestTokens(asset) {
+            try {
+                const tokenAddress = getTokenAddress(asset);
+                if (!tokenAddress || tokenAddress === '0x...') {
+                    alert('Adresse du token non configurée');
+                    return;
+                }
+                
+                const tokenContract = new web3.eth.Contract(ERC20_ABI, tokenAddress);
+                const decimals = await tokenContract.methods.decimals().call();
+                const faucetAmount = web3.utils.toBN(1000).mul(web3.utils.toBN(10).pow(web3.utils.toBN(decimals)));
+                
+                await tokenContract.methods.faucet(faucetAmount).send({
+                    from: userAccount,
+                    gas: 100000
+                });
+                
+                alert(`1000 ${asset} reçus du faucet!`);
+                await updateWalletBalances();
+                
+            } catch (error) {
+                console.error('Erreur faucet:', error);
+                alert('Erreur lors de la demande de tokens de test');
+            }
+        }
+        
+        // Ajouter un bouton faucet dans l'interface
+        function addFaucetButtons() {
+            if (!userAccount) return;
+            
+            const actionCells = document.querySelectorAll('td:last-child');
+            actionCells.forEach(cell => {
+                const depositButton = cell.querySelector('.action-button:not(.borrow)');
+                if (depositButton && !cell.querySelector('.faucet-button')) {
+                    const row = cell.closest('tr');
+                    const assetCell = row.querySelector('.asset-name');
+                    if (assetCell) {
+                        const asset = assetCell.textContent.split(' ')[0]; // ETH, USDC, etc.
+                        
+                        const faucetButton = document.createElement('button');
+                        faucetButton.className = 'action-button faucet-button';
+                        faucetButton.textContent = 'Faucet';
+                        faucetButton.style.marginLeft = '5px';
+                        faucetButton.style.background = 'rgba(34, 197, 94, 0.2)';
+                        faucetButton.style.color = '#22c55e';
+                        faucetButton.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+                        faucetButton.onclick = () => requestTestTokens(asset);
+                        
+                        cell.appendChild(faucetButton);
+                    }
+                }
+            });
+        }
+    </script>
+
+    <!-- Web3.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.0/web3.min.js"></script>
+</body>
+</html>
