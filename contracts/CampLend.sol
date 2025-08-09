@@ -43,7 +43,7 @@ contract CampLend is ReentrancyGuard, Pausable, Ownable {
         
         // Utiliser le nouveau comptroller avec support borrow conditionnel
         // Par défaut, borrowEnabled = false (sera configuré séparément)
-        comptroller.listMarket(address(cToken), collateralFactor, liquidationThreshold, false);
+        comptroller.listMarket(address(cToken), collateralFactor, liquidationThreshold);
         
         emit MarketCreated(underlying, address(cToken));
     }

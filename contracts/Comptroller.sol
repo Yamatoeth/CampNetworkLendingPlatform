@@ -128,8 +128,8 @@ contract Comptroller is Ownable {
                     sumCollateral = sumCollateral.sub(redeemValue);
                 }
                 if (borrowAmount > 0) {
-                    uint256 borrowValue = borrowAmount.mul(oraclePrice).div(1e18);
-                    sumBorrowPlusEffects = sumBorrowPlusEffects.add(borrowValue);
+                    uint256 newBorrowValue = borrowAmount.mul(oraclePrice).div(1e18);
+                    sumBorrowPlusEffects = sumBorrowPlusEffects.add(newBorrowValue);
                 }
             }
         }

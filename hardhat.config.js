@@ -1,6 +1,7 @@
 // hardhat.config.js
 require("@nomicfoundation/hardhat-toolbox");
-require("@nomiclabs/hardhat-etherscan");
+require("@nomicfoundation/hardhat-toolbox");
+require("hardhat-gas-reporter");
 require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
@@ -11,7 +12,8 @@ module.exports = {
       optimizer: {
         enabled: true,
         runs: 200
-      }
+      },
+      viaIR: true
     }
   },
   networks: {
