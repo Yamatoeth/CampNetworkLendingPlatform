@@ -5,11 +5,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Hardhat](https://img.shields.io/badge/Built%20with-Hardhat-FFDB1C.svg)](https://hardhat.org/)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.19-363636.svg)](https://soliditylang.org/)
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-success)](https://yamatoeth.github.io/CampNetworkLendingPlatform/)
-
-## 🌐 Website
-
-**🚀 [Visitez la page officielle du projet](https://yamatoeth.github.io/CampNetworkLendingPlatform/)**
 
 ## 🌟 Présentation
 
@@ -20,6 +15,10 @@ CampLend est un protocole DeFi complet permettant le **lending** et **borrowing*
 - ⚡ **Taux variables** adaptatifs basés sur l'utilisation
 - 🛡️ **Liquidations automatiques** pour maintenir la solvabilité
 - 🎨 **Interface moderne** responsive et intuitive
+
+## 🌐 Hébergement
+
+Ce projet est prêt à être déployé sur Vercel pour une expérience web rapide et moderne.
 
 ## 🌐 Configuration Camp Network
 
