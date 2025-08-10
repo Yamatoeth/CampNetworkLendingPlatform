@@ -1150,8 +1150,6 @@
         document.getElementById('connectWalletBtn').onclick = connectWallet;
         document.getElementById('disconnectWalletBtn').onclick = disconnectWallet;
 
-        updateWalletButtons();
-
         // Navigation entre les pages
         function showPage(page) {
           document.getElementById('pageMarche').style.display = (page === 'marche') ? '' : 'none';
@@ -1161,11 +1159,20 @@
           document.getElementById('tabPortfolio').classList.toggle('active', page === 'portfolio');
           document.getElementById('tabGouvernance').classList.toggle('active', page === 'gouvernance');
         }
-        
-        // Portfolio : tokens, dépôts, emprunts
+
+        document.getElementById('tabMarche').onclick = () => showPage('marche');
+        document.getElementById('tabPortfolio').onclick = () => { showPage('portfolio'); loadPortfolio(); };
+        document.getElementById('tabGouvernance').onclick = () => { showPage('gouvernance'); loadGovernance(); };
+
+        showPage('marche');
+
         async function loadPortfolio() {
-          if (!userAccount) return;
-          // Soldes tokens
+          if (!userAccount) {
+            document.getElementById('portfolioTokens').innerHTML = '<div style="color:#e53e3e;">Connectez votre wallet pour voir votre portfolio.</div>';
+            document.getElementById('portfolioDeposits').innerHTML = '';
+            document.getElementById('portfolioBorrows').innerHTML = '';
+            return;
+          }
           let html = '<h3>Mes tokens</h3>';
           for (const token of TOKEN_LIST) {
             const tokenContract = new web3.eth.Contract(ERC20_ABI, token.address);
@@ -1175,24 +1182,23 @@
             html += `<div>${token.symbol}: <span style='color:#22c55e;'>${displayBalance}</span></div>`;
           }
           document.getElementById('portfolioTokens').innerHTML = html;
-          // Dépôts et emprunts (exemple, à adapter selon vos contrats)
           document.getElementById('portfolioDeposits').innerHTML = '<h3>Mes dépôts</h3><div>(À implémenter: requête sur CToken ou CampLend)</div>';
           document.getElementById('portfolioBorrows').innerHTML = '<h3>Mes emprunts</h3><div>(À implémenter: requête sur CToken ou CampLend)</div>';
         }
 
-        // Gouvernance : staking wCAMP
         async function loadGovernance() {
-          if (!userAccount) return;
-          // Afficher le montant staké (exemple, à adapter selon votre contrat de staking)
+          if (!userAccount) {
+            document.getElementById('governanceStake').innerHTML = '<div style="color:#e53e3e;">Connectez votre wallet pour accéder au staking.</div>';
+            return;
+          }
           document.getElementById('governanceStake').innerHTML = '<div>Montant staké : <span style="color:#22c55e;">(À implémenter)</span> wCAMP</div>';
         }
+
         document.getElementById('stakeBtn').onclick = async function() {
           const amount = document.getElementById('stakeAmount').value;
-          // Appel staking à implémenter
           alert('Fonction staking à implémenter : ' + amount + ' wCAMP');
         };
         document.getElementById('unstakeBtn').onclick = async function() {
-          // Appel unstaking à implémenter
           alert('Fonction unstaking à implémenter');
         };
     </script>
