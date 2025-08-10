@@ -1,69 +1,4 @@
-        async function supplyAsset(asset, amount) {
-            try {
-                const tokenAddress = getTokenAddress(asset);
-                const campLendContract = new web3.eth.Contract(CAMP_LEND_ABI, CONTRACTS.CAMP_LEND);
-                const tokenContract = new web3.eth.Contract(ERC20_ABI, tokenAddress);
-                
-                const decimals = await tokenContract.methods.decimals().call();
-                const amountWei = web3.utils.toBN(amount).mul(web3.utils.toBN(10).pow(web3.utils.toBN(decimals)));
-                
-                // Approuver le contrat CampLend
-                await tokenContract.methods.approve(CONTRACTS.CAMP_LEND, amountWei).send({
-                    from: userAccount,
-                    gas: 100000
-                });
-                
-                // Effectuer le dépôt
-                await campLendContract.methods.supply(tokenAddress, amountWei).send({
-                    from: userAccount,
-                    gas: 300000
-                });
-                
-            } catch (error) {
-                console.error('Erreur lors du dépôt:', error);
-                throw error;
-            }
-        }
-
-        async function borrowAsset(asset, amount) {
-            try {
-                const tokenAddress = getTokenAddress(asset);
-                const campLendContract = new web3.eth.Contract(CAMP_LEND_ABI, CONTRACTS.CAMP_LEND);
-                const tokenContract = new web3.eth.Contract(ERC20_ABI, tokenAddress);
-                
-                const decimals = await tokenContract.methods.decimals().call();
-                const amountWei = web3.utils.toBN(amount).mul(web3.utils.toBN(10).pow(web3.utils.toBN(decimals)));
-                
-                // Effectuer l'emprunt
-                await campLendContract.methods.borrow(tokenAddress, amountWei).send({
-                    from: userAccount,
-                    gas: 400000
-                });
-                
-            } catch (error) {
-                console.error('Erreur lors de l\'emprunt:', error);
-                throw error;
-            }
-        }
-        
-        function getTokenAddress(symbol) {
-            const tokenMap = {
-                'wCAMP': CONTRACTS.wCAMP,
-                'CP': CONTRACTS.CP,
-                'MUSDC': CONTRACTS.MUSDC,
-                'WBTC': CONTRACTS.WBTC,
-                'WETH': CONTRACTS.WETH,
-                'MUSDT': CONTRACTS.MUSDT
-            };
-            return tokenMap[symbol];
-        }
-        
-        // Fonction pour obtenir des tokens de test (faucet)
-        async function requestTestTokens(asset) {
-            try {
-                const tokenAddress = getTokenAddress(asset);
-                if (!tokenAddress || tokenAddress === '0x...') {
-                    alert('Adresse du token non configurée<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -526,6 +461,8 @@
         </div>
     </div>
 
+    <!-- Scripts JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.0/web3.min.js"></script>
     <script>
         // Market data - Mise à jour pour Camp Network
         const marketData = [
@@ -1125,8 +1062,5 @@
             });
         }
     </script>
-
-    <!-- Web3.js CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.0/web3.min.js"></script>
 </body>
 </html>
