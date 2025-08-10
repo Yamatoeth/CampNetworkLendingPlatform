@@ -371,20 +371,22 @@
             <nav class="nav">
                 <div class="logo">CampLend</div>
                 <div class="nav-links">
-                    <a href="#" class="nav-link active">Marché</a>
-                    <a href="#" class="nav-link">Portfolio</a>
-                    <a href="#" class="nav-link">Gouvernance</a>
+                    <a href="#marche" class="nav-link" id="tabMarche">Marché</a>
+                    <a href="#portfolio" class="nav-link" id="tabPortfolio">Portfolio</a>
+                    <a href="#gouvernance" class="nav-link" id="tabGouvernance">Gouvernance</a>
                 </div>
                 <div>
-                    <button class="connect-wallet" id="connectWallet">Connecter Wallet</button>
-                    <span class="wallet-status" id="walletStatus">Connecté</span>
+                    <button id="connectWalletBtn" class="connect-wallet">Connecter Wallet</button>
+                    <button id="disconnectWalletBtn" class="connect-wallet" style="display:none;background:#e53e3e;">Déconnecter</button>
+                    <span id="walletAddress" style="display:none;cursor:pointer;font-weight:600;background:rgba(102,126,234,0.1);padding:8px 16px;border-radius:12px;margin-left:10px;"></span>
+                    <div id="walletPopup" style="display:none;position:absolute;top:60px;right:40px;background:#18182b;border-radius:12px;padding:20px;box-shadow:0 4px 24px #0002;z-index:999;color:#fff;min-width:220px;"></div>
                 </div>
             </nav>
         </div>
     </header>
 
     <main class="main">
-        <div class="container">
+        <section id="pageMarche">
             <!-- Dashboard Stats -->
             <div class="dashboard">
                 <div class="stats-card">
@@ -439,7 +441,23 @@
                     </table>
                 </div>
             </div>
-        </div>
+        </section>
+        <section id="pagePortfolio" style="display:none;">
+            <h2>Portfolio</h2>
+            <div id="portfolioTokens"></div>
+            <div id="portfolioDeposits"></div>
+            <div id="portfolioBorrows"></div>
+        </section>
+        <section id="pageGouvernance" style="display:none;">
+            <h2>Gouvernance</h2>
+            <div id="governanceStake"></div>
+            <div id="governanceApy" style="margin-top:10px;color:#22c55e;font-weight:600;">APY staking : 3,1%</div>
+            <div style="margin-top:20px;">
+                <input type="number" id="stakeAmount" placeholder="Montant à staker (wCAMP)" style="padding:8px;border-radius:8px;border:1px solid #333;width:180px;">
+                <button id="stakeBtn" style="padding:8px 18px;border-radius:8px;background:#667eea;color:#fff;font-weight:600;margin-left:8px;">Staker</button>
+                <button id="unstakeBtn" style="padding:8px 18px;border-radius:8px;background:#e53e3e;color:#fff;font-weight:600;margin-left:8px;">Déstaker</button>
+            </div>
+        </section>
     </main>
 
     <!-- Modal -->
@@ -706,6 +724,15 @@
         const assetInput = document.getElementById('assetInput');
         const modalTitle = document.getElementById('modalTitle');
 
+        const TOKEN_LIST = [
+          { symbol: 'wCAMP', address: CONTRACTS.wCAMP },
+          { symbol: 'CP', address: CONTRACTS.CP },
+          { symbol: 'MUSDC', address: CONTRACTS.MUSDC },
+          { symbol: 'WBTC', address: CONTRACTS.WBTC },
+          { symbol: 'WETH', address: CONTRACTS.WETH },
+          { symbol: 'MUSDT', address: CONTRACTS.MUSDT }
+        ];
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             populateMarketTables();
@@ -802,6 +829,28 @@
 
             // Submit action
             submitAction.addEventListener('click', executeAction);
+
+            // Wallet address click
+            document.getElementById('walletAddress').onclick = function() {
+              const popup = document.getElementById('walletPopup');
+              if (popup.style.display === 'none' || popup.style.display === '') {
+                showWalletPopup();
+              } else {
+                hideWalletPopup();
+              }
+            };
+
+            // Click outside to hide popup
+            document.body.addEventListener('click', function(e) {
+              if (!e.target.closest('#walletAddress') && !e.target.closest('#walletPopup')) {
+                hideWalletPopup();
+              }
+            });
+
+            // Tab navigation
+            document.getElementById('tabMarche').onclick = () => showPage('marche');
+            document.getElementById('tabPortfolio').onclick = () => { showPage('portfolio'); loadPortfolio(); };
+            document.getElementById('tabGouvernance').onclick = () => { showPage('gouvernance'); loadGovernance(); };
         }
 
         function switchTab(tab) {
@@ -1061,6 +1110,92 @@
                 }
             });
         }
+
+        let userAccount = null;
+
+        function updateWalletButtons() {
+          const connectBtn = document.getElementById('connectWalletBtn');
+          const disconnectBtn = document.getElementById('disconnectWalletBtn');
+          const walletAddr = document.getElementById('walletAddress');
+          if (userAccount) {
+            connectBtn.style.display = 'none';
+            disconnectBtn.style.display = '';
+            walletAddr.style.display = '';
+            walletAddr.textContent = userAccount.slice(0,6) + '...' + userAccount.slice(-4);
+          } else {
+            connectBtn.style.display = '';
+            disconnectBtn.style.display = 'none';
+            walletAddr.style.display = 'none';
+            hideWalletPopup();
+          }
+        }
+
+        function hideWalletPopup() {
+          document.getElementById('walletPopup').style.display = 'none';
+        }
+
+        async function showWalletPopup() {
+          if (!userAccount) return;
+          const popup = document.getElementById('walletPopup');
+          popup.innerHTML = '<div style="font-weight:700;margin-bottom:10px;">Mes tokens faucet</div>';
+          for (const token of TOKEN_LIST) {
+            const tokenContract = new web3.eth.Contract(ERC20_ABI, token.address);
+            let balance = await tokenContract.methods.balanceOf(userAccount).call();
+            let decimals = await tokenContract.methods.decimals().call();
+            let displayBalance = (parseFloat(balance) / Math.pow(10, decimals)).toFixed(4);
+            popup.innerHTML += `<div style='margin-bottom:8px;'>${token.symbol}: <span style='color:#22c55e;'>${displayBalance}</span></div>`;
+          }
+          popup.style.display = '';
+        }
+
+        document.getElementById('connectWalletBtn').onclick = connectWallet;
+        document.getElementById('disconnectWalletBtn').onclick = disconnectWallet;
+
+        updateWalletButtons();
+
+        // Navigation entre les pages
+        function showPage(page) {
+          document.getElementById('pageMarche').style.display = (page === 'marche') ? '' : 'none';
+          document.getElementById('pagePortfolio').style.display = (page === 'portfolio') ? '' : 'none';
+          document.getElementById('pageGouvernance').style.display = (page === 'gouvernance') ? '' : 'none';
+          document.getElementById('tabMarche').classList.toggle('active', page === 'marche');
+          document.getElementById('tabPortfolio').classList.toggle('active', page === 'portfolio');
+          document.getElementById('tabGouvernance').classList.toggle('active', page === 'gouvernance');
+        }
+        
+        // Portfolio : tokens, dépôts, emprunts
+        async function loadPortfolio() {
+          if (!userAccount) return;
+          // Soldes tokens
+          let html = '<h3>Mes tokens</h3>';
+          for (const token of TOKEN_LIST) {
+            const tokenContract = new web3.eth.Contract(ERC20_ABI, token.address);
+            let balance = await tokenContract.methods.balanceOf(userAccount).call();
+            let decimals = await tokenContract.methods.decimals().call();
+            let displayBalance = (parseFloat(balance) / Math.pow(10, decimals)).toFixed(4);
+            html += `<div>${token.symbol}: <span style='color:#22c55e;'>${displayBalance}</span></div>`;
+          }
+          document.getElementById('portfolioTokens').innerHTML = html;
+          // Dépôts et emprunts (exemple, à adapter selon vos contrats)
+          document.getElementById('portfolioDeposits').innerHTML = '<h3>Mes dépôts</h3><div>(À implémenter: requête sur CToken ou CampLend)</div>';
+          document.getElementById('portfolioBorrows').innerHTML = '<h3>Mes emprunts</h3><div>(À implémenter: requête sur CToken ou CampLend)</div>';
+        }
+
+        // Gouvernance : staking wCAMP
+        async function loadGovernance() {
+          if (!userAccount) return;
+          // Afficher le montant staké (exemple, à adapter selon votre contrat de staking)
+          document.getElementById('governanceStake').innerHTML = '<div>Montant staké : <span style="color:#22c55e;">(À implémenter)</span> wCAMP</div>';
+        }
+        document.getElementById('stakeBtn').onclick = async function() {
+          const amount = document.getElementById('stakeAmount').value;
+          // Appel staking à implémenter
+          alert('Fonction staking à implémenter : ' + amount + ' wCAMP');
+        };
+        document.getElementById('unstakeBtn').onclick = async function() {
+          // Appel unstaking à implémenter
+          alert('Fonction unstaking à implémenter');
+        };
     </script>
 </body>
 </html>
